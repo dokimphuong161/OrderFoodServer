@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.finaltest.orderfoodserver.Common.Common;
 import com.finaltest.orderfoodserver.Interface.ItemClickListener;
 import com.finaltest.orderfoodserver.Model.Category;
+import com.finaltest.orderfoodserver.Model.Order;
 import com.finaltest.orderfoodserver.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -295,6 +296,13 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+        if(id == R.id.nav_orders)
+        {
+            Intent orders = new Intent(Home.this, OrderStatus.class);
+            startActivity(orders);
+
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
