@@ -7,11 +7,16 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.finaltest.orderfoodserver.Common.Common;
+//import com.finaltest.orderfoodserver.Remote.IGeoCoordinates;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -21,8 +26,19 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.Bidi;
+
+//import retrofit2.Call;
+//import retrofit2.Callback;
+//import retrofit2.Response;
 
 
 public class TrackingOrder extends FragmentActivity implements OnMapReadyCallback,
@@ -45,10 +61,13 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
     private static int FATEST_INTERVAL=5000;
     private static int DISPLACEMENT=10;
 
+//    private IGeoCoordinates mService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_order);
+
+//        mService = Common.getGeoCodeService();
         
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
         && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED )
@@ -89,14 +108,57 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
                 mMap.addMarker(new MarkerOptions().position(yourLocation).title("Your Location"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(yourLocation));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f));
+
+//                //After add Marker for yor location, Add Marker for this Order
+//                drawRoute(yourLocation,Common.currenRequest.getAddress());
             }
             else
             {
                 Toast.makeText(this, "Couldn't get the location", Toast.LENGTH_SHORT).show();
+                Log.d("DEBUG", "Couldn't get the location");
             }
         }
 
     }
+
+//    private void drawRoute(LatLng yourLocation, String address) {
+//        mService.getGeoCode(address).enqueue(new Callback<String>() {
+//            @Override
+//            public void onResponse(Call<String> call, Response<String> response) {
+//                try{
+//                    JSONObject jsonObject = new JSONObject(response.body().toString());
+//
+//                    String lat = ((JSONArray) jsonObject.get("results"))
+//                            .getJSONObject(0)
+//                            .getJSONObject("geometry")
+//                            .getJSONObject("location")
+//                            .get("lat").toString();
+//                    String lng = ((JSONArray) jsonObject.get("results"))
+//                            .getJSONObject(0)
+//                            .getJSONObject("geometry")
+//                            .getJSONObject("location")
+//                            .get("lng").toString();
+//
+//                    LatLng orderLocation = new LatLng(Double.parseDouble(lat),Double.parseDouble(lng));
+//
+//                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.box);
+//                    bitmap = Common.scaleBitmap(bitmap,70,70);
+//
+//                    MarkerOptions marker = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+//                            .title("Order of " + Common.currenRequest.getPhone())
+//                            .position(orderLocation);
+//                    mMap.addMarker(marker);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<String> call, Throwable t) {
+//
+//            }
+//        });
+//    }
 
     private void createLocationRequest() {
         mLocatonRequest = new LocationRequest();

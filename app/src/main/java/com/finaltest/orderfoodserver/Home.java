@@ -30,6 +30,7 @@ import com.finaltest.orderfoodserver.Common.Common;
 import com.finaltest.orderfoodserver.Interface.ItemClickListener;
 import com.finaltest.orderfoodserver.Model.Category;
 import com.finaltest.orderfoodserver.Model.Order;
+import com.finaltest.orderfoodserver.Service.ListenOder;
 import com.finaltest.orderfoodserver.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -37,8 +38,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -120,6 +125,10 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         recycler_menu.setLayoutManager(layoutManager);
 
         loadMenu();
+
+        //Call Service
+        Intent service = new Intent(Home.this, ListenOder.class);
+        startService(service);
 
 
     }
@@ -328,6 +337,25 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     }
 
     private void deleteCategory(String key) {
+
+        //First, we need get all food in category
+        DatabaseReference foods = database.getReference("Food");
+        Query foodInCategory = foods.orderByChild("menuID").equalTo(key);
+        foodInCategory.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot postSnapShot:snapshot.getChildren())
+                {
+                    postSnapShot.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         categories.child(key).removeValue();
         Toast.makeText(this, "Item deleted !!!", Toast.LENGTH_SHORT).show();
     }
