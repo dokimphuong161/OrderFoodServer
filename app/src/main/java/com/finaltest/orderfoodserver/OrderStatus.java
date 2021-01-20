@@ -61,29 +61,44 @@ public class OrderStatus extends AppCompatActivity {
                 OrderViewHolder.class,
                 requests) {
             @Override
-            protected void populateViewHolder(OrderViewHolder orderViewHolder, final Request request, int i) {
+            protected void populateViewHolder(OrderViewHolder orderViewHolder, final Request request, final int i) {
 
                 orderViewHolder.txtOrderId.setText(adapter.getRef(i).getKey());
                 orderViewHolder.txtOrderStatus.setText(Common.convertCodeToStatus(request.getStatus()));
                 orderViewHolder.txtOrderAddress.setText(request.getAddress());
                 orderViewHolder.txtOrderPhone.setText(request.getPhone());
 
-                orderViewHolder.setItemClickListener(new ItemClickListener() {
+                //New event button
+                orderViewHolder.btnEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View view, int position, boolean isLongClick) {
-                        if(!isLongClick)
-                        {
-                            Intent trackingOrder = new Intent(OrderStatus.this, TrackingOrder.class);
-                            Common.currenRequest = request;
-                            startActivity(trackingOrder);
-                        }else
-                        {
-                            Intent orderDetail = new Intent(OrderStatus.this, OrderDetail.class);
-                            Common.currenRequest = request;
-                            orderDetail.putExtra("OrderId",adapter.getRef(position).getKey());
-                            startActivity(orderDetail);
-                        }
+                    public void onClick(View view) {
+                        showUpdateDialog(adapter.getRef(i).getKey(),adapter.getItem(i));
+                    }
+                });
 
+                orderViewHolder.btnRemove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        deleteOrder(adapter.getRef(i).getKey());
+                    }
+                });
+
+                orderViewHolder.btnDetail.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent orderDetail = new Intent(OrderStatus.this, OrderDetail.class);
+                        Common.currenRequest = request;
+                        orderDetail.putExtra("OrderId",adapter.getRef(i).getKey());
+                        startActivity(orderDetail);
+                    }
+                });
+
+                orderViewHolder.btnDirection.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent trackingOrder = new Intent(OrderStatus.this, TrackingOrder.class);
+                        Common.currenRequest = request;
+                        startActivity(trackingOrder);
                     }
                 });
             }
@@ -92,17 +107,10 @@ public class OrderStatus extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if(item.getTitle().equals(Common.UPDATE))
-            showUpdateDialog(adapter.getRef(item.getOrder()).getKey(),adapter.getItem(item.getOrder()));
-        else if(item.getTitle().equals(Common.DELETE))
-            deleteOrder(adapter.getRef(item.getOrder()).getKey());
-        return super.onContextItemSelected(item);
-    }
 
     private void deleteOrder(String key) {
         requests.child(key).removeValue();
+        adapter.notifyDataSetChanged();
     }
 
     private void showUpdateDialog(String key, final Request item) {
@@ -125,6 +133,8 @@ public class OrderStatus extends AppCompatActivity {
                 item.setStatus(String.valueOf(spinner.getSelectedIndex()));
 
                 requests.child(localKey).setValue(item);
+
+                adapter.notifyDataSetChanged();
             }
         });
         alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
